@@ -2,7 +2,7 @@ import ast
 from pathlib import Path
 
 
-SOURCE = Path(__file__).parents[1] / "contracts" / "greenwash_bond.py"
+SOURCE = Path(__file__).parents[2] / "contracts" / "greenwash_bond.py"
 
 
 def test_contract_parses_and_declares_genvm_collections():

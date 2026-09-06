@@ -30,11 +30,16 @@ persists the ledger before calling the sole GEN emission helper
 
 Web evidence uses rendered text first (`web.render(..., mode="text")`) with an
 HTTP fallback, so JavaScript-heavy disclosure sites can be assessed. Photos use
-GenLayer vision and store only the consensus-reviewed observation, never raw
-image blobs. Every non-deterministic block (text audit, visual relevance) has
-a validator that independently re-fetches sources and reruns the task itself
-before comparing decision fields to the leader's — never a leader-output-only
-schema check, and never a fuzzy tolerance band on a value that moves funds.
+GenLayer vision, but only a bounded, fixed-vocabulary tag set and the
+relevance bucket are ever fed into the audit that decides payout — never raw
+image blobs, and never the leader's freeform description on its own. That
+freeform text is stored for human review only; validators must independently
+reproduce the *exact same tag set* before it's treated as real evidence, so a
+photo can never reach settlement on one leader's unverified reading of it.
+Every non-deterministic block (text audit, visual tagging) has a validator
+that independently re-fetches sources and reruns the task itself before
+comparing decision fields to the leader's — never a leader-output-only schema
+check, and never a fuzzy tolerance band on a value that moves funds.
 `EVIDENCE_CONFLICT` is the sole exception: it is treated as agreement whenever
 *both* independent runs land on it, and it is deliberately non-settleable
 (only refundable via timeout) so contradictory evidence never gets forced
@@ -52,13 +57,17 @@ No method anywhere accepts a caller-supplied clock; every timing check reads
 
 ```bash
 python3 -m py_compile contracts/greenwash_bond.py
-pytest -q test/test_greenwash_bond_static.py
+pytest -q tests/static/test_greenwash_bond_static.py
 ```
 
 Deploy [contracts/greenwash_bond.py](contracts/greenwash_bond.py) with no
 constructor arguments. Payable writes must supply native GEN as `value` in
 wei; validate `value_credited: true` in the transaction receipt before relying
-on escrow state.
+on escrow state. The `genlayer` CLI's `write` command cannot attach GEN value
+to a transaction, so payable calls (`create_claim`, `open_challenge`) must go
+through `gltest` instead — see [docs/TESTING.md](docs/TESTING.md) for the live
+integration suite that exercises every write method against a deployed
+contract on StudioNet.
 
 ## Project isolation
 
